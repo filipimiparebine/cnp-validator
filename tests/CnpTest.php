@@ -20,8 +20,14 @@ class CnpTest extends TestCase
         // Leap year
         $this->assertTrue(Cnp::isValid('5000229061411'));
         // Wrong date
-        $this->assertFalse(Cnp::isValid('1970431095361'));
+        $this->assertFalse(Cnp::isValid('1970431095363'));
         // Correct
         $this->assertTrue(Cnp::isValid('1970430095360'));
+        // Foreign wrong date
+        $this->assertFalse(Cnp::isValid('7970431095364'));
+        // Foreign wrong leap year
+        $this->assertFalse(Cnp::isValid('7000230061416'));
+        // Foreign correct leap year
+        $this->assertTrue(Cnp::isValid('7000229061415'));
     }
 }

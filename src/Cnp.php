@@ -20,22 +20,31 @@ class Cnp
 
     public static function isValid(string $cnp): bool
     {
-        if (strlen($cnp) !== self::LENGTH || !ctype_digit($cnp))
+        if (!self::isValidFormat($cnp) || !self::isValidControl($cnp))
             return false;
 
         foreach (self::ELEMENTS as $element => $rule)
-            if (!self::isValidElement($cnp, $rule))
+            if (!self::isValidElement($cnp, $element, $rule))
                 return false;
 
         if (!self::isValidDate($cnp))
             return false;
 
-        return self::isValidControl($cnp);
+        return true;
     }
 
-    private static function isValidElement(string $cnp, array $rule): bool
+    private static function isValidFormat(string $cnp): bool
+    {
+        return strlen($cnp) === self::LENGTH && ctype_digit($cnp);
+    }
+
+    private static function isValidElement(string $cnp, string $element, array $rule): bool
     {
         $value = (int) substr($cnp, $rule['start'], $rule['length']);
+
+        if ($element !== 'year' && $value === 0)
+            return false;
+
         return $value <= $rule['max'];
     }
 
@@ -45,7 +54,20 @@ class Cnp
         $month = (int) substr($cnp, self::ELEMENTS['month']['start'], self::ELEMENTS['month']['length']);
         $year = self::getFullYear($cnp);
 
-        return $year ? checkdate($month, $day, $year) : true;
+        if (!$year)
+            return self::isValidDayAndMonth($day, $month);
+
+        return checkdate($month, $day, $year);
+    }
+
+    private static function isValidDayAndMonth(int $day, int $month): bool
+    {
+        $numberOfDaysInMonth = match ($month) {
+            6, 9, 11 => [30],
+            2 => [28, 29],
+            default => [31]
+        };
+        return in_array($day, $numberOfDaysInMonth);
     }
 
     private static function getFullYear(string $cnp): ?int
