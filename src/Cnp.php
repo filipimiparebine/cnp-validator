@@ -63,7 +63,7 @@ class Cnp
     private static function isValidDayAndMonth(int $day, int $month): bool
     {
         $numberOfDaysInMonth = match ($month) {
-            6, 9, 11 => [30],
+            4, 6, 9, 11 => [30],
             2 => [28, 29],
             default => [31]
         };
